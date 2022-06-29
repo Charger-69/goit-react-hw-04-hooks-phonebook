@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import {useState} from 'react';
 import Label from './Label';
 import InputName from './InputName';
 import InputNumber from './InputNumber';
@@ -6,65 +6,61 @@ import Button from 'components/Button';
 import s from './ContactForm.module.css';
 import { nanoid } from 'nanoid'
 
-class ContactForm extends Component{
-    state = {
-        id: '',
-        name: '',
-        number: ''
-    };
+function ContactForm(props) {
+    const [id, setId] = useState(nanoid(6));
+    const [name, setName] = useState('');
+    const [number, setNumber] = useState('');
 
-    setId = () => {
-        let nameInputId = nanoid(6);
-        this.setState({
-            id: nameInputId,
-        })
+    const handleIdChange = () => {
+        return setId(nanoid(6));
     }
 
-    handleSubmit = event => {
+    const handleSubmit = event => {
         event.preventDefault();
 
-        this.setId();
+        handleIdChange();
 
         setTimeout(() => {
-            this.props.onSubmit(this.state);
+            props.onSubmit({ id, name, number });
 
-        this.resetForm();
+        resetForm();
         }, 10);
-    
+    };
+
+    const handleChange = event => {
+        const { name, value } = event.currentTarget;
         
-    };
-    
-    handleInputChange = event => {
-        const { name, value } = event.currentTarget
-        this.setState({
-            [name]: value,
-        });
-    };
-
-    resetForm = () => {
-        this.setState({
-            name: '',
-            number: ''
-        })
-    };
-
-    
-    render() {
-        const { name, number } = this.state;
-        const { handleSubmit, handleInputChange } = this;
-
-        return <form onSubmit={handleSubmit} className={s.form}>
-            <Label labelTitle={'Name'}>
-                <InputName name={name} onNameChange={handleInputChange}/>
-            </Label>
+        switch (name) {
+            case 'name':
+                setName(value);
+                break;
             
-            <Label labelTitle={'Number'}>
-                <InputNumber number={number} onNumberChange={handleInputChange} />
-            </Label>
-            
-            <Button type={'submit'} title={"Add contact"} />
-    </form>
+            case 'number': {
+                setNumber(value);
+                break;
+            }
+                
+            default:
+                return;
+        }
     };
+
+    const resetForm = () => {
+        setName('');
+        setNumber('');
+    };
+
+    return <form onSubmit={handleSubmit} className={s.form}>
+        <Label labelTitle={'Name'}>
+            <InputName name={name} onNameChange={handleChange}/>
+        </Label>
+        
+        <Label labelTitle={'Number'}>
+            <InputNumber number={number} onNumberChange={handleChange} />
+        </Label>
+        
+        <Button type={'submit'} title={"Add contact"} />
+</form>
 };
 
 export default ContactForm;
